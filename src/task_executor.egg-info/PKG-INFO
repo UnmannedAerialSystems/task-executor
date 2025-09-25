@@ -1,8 +1,0 @@
-Metadata-Version: 2.4
-Name: task-executor
-Version: 1.0.0
-Summary: A Python package for executing and managing UAS tasks with prioritization and scheduling capabilities.
-Author-email: The Pennsylvania State University Unmanned Aerial Systems Club <psuuasofficial@gmail.com>
-License-Expression: GPL-3.0
-Description-Content-Type: text/markdown
-Requires-Dist: MAVez>=3.1.2
