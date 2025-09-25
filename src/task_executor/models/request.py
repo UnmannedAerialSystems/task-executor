@@ -1,3 +1,10 @@
+# request.py
+# version: 1.0.0
+# Author: Theodore Tasman
+# Creation Date: 2025-09-25
+# Last Modified: 2025-09-25
+# Organization: PSU UAS
+
 import json
 
 class Request:

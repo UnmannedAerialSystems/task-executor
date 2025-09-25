@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name='task-executor'
+version='1.0.0'
+description='A Python package for executing and managing UAS tasks with prioritization and scheduling capabilities.'
+authors=[
+    {name='The Pennsylvania State University Unmanned Aerial Systems Club', email='psuuasofficial@gmail.com'}
+]
+license='GPL-3.0'
+readme='README.md'
+dependencies=[
+    'MAVez>=3.1.2'
+    
+]
