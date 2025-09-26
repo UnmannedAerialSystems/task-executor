@@ -15,10 +15,22 @@ class Task(ABC):
         self.task_id = request.task_id
         self.priority = request.priority
         self.params = request.params
+        self.compiled = False
         self.compile()
 
-    @abstractmethod
     def execute(self) -> int:
+        """
+        Execute the task after ensuring it is compiled.
+
+        Returns:
+            int: The result of the task execution.
+        """
+        if not self.compiled:
+            raise RuntimeError("Task must be compiled before execution.")
+        return self._do_execute()
+
+    @abstractmethod
+    def _do_execute(self) -> int:
         """
         Execute the task.
 

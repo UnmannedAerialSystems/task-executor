@@ -8,13 +8,10 @@
 from task_executor.models.task import Task
 
 class Detect(Task):
-    def execute(self) -> int:
+    def _do_execute(self) -> int:
         print("Executing Detect Task")
         return 0
     
     def compile(self) -> int:
         print("Compiling Detect Task")
         return 0
-
-    
-

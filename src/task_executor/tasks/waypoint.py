@@ -8,13 +8,10 @@
 from task_executor.models.task import Task
 
 class Waypoint(Task):
-    def execute(self) -> int:
+    def _do_execute(self) -> int:
         print("Executing Waypoint Task")
         return 0
     
     def compile(self) -> int:
         print("Compiling Waypoint Task")
         return 0
-
-    
-
