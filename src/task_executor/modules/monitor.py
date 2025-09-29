@@ -1,3 +1,9 @@
+# config.py
+# version 1.0.0
+# Author: Theodore Tasman
+# Creation Date: 2025-09-29
+# Last Modified: 2025-09-29
+
 from task_executor.utils.zmq_subscriber import ZMQSubscriber
 
 import json

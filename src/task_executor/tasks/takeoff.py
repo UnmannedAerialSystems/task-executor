@@ -1,8 +1,8 @@
 # takeoff.py
-# version: 1.0.0
-# Author: 
+# version: 1.1.0
+# Author: Theodore Tasman
 # Creation Date: 2025-09-25
-# Last Modified: 2025-09-25
+# Last Modified: 2025-09-29
 # Organization: PSU UAS
 
 from task_executor.models.config import Config

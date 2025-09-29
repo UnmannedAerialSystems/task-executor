@@ -1,3 +1,9 @@
+# config.py
+# version 1.0.0
+# Author: Theodore Tasman
+# Creation Date: 2025-09-29
+# Last Modified: 2025-09-29
+
 class Config:
     def __init__(self, config_dict: dict):
 
