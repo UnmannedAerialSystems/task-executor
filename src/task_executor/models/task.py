@@ -1,26 +1,25 @@
-# task.py
-# version: 1.1.0
+# src/task_executor/models/task.py
+# version: 1.2.0
 # Author: Theodore Tasman
 # Creation Date: 2025-09-25
 # Last Modified: 2025-09-29
 # Organization: PSU UAS
 
-from abc import ABC, abstractmethod
 from task_executor.models.request import Request
-from task_executor.models.config import Config
-import asyncio
+from task_executor.modules.context import Context
+
+from abc import ABC, abstractmethod
 
 class Task(ABC):
 
-    def __init__(self, request: Request, config: Config):
+    def __init__(self, request: Request, context: Context):
         self.request_id = request.request_id
         self.task_id = request.task_id
         self.priority = request.priority
         self.params = request.params
         self.compiled = False
-        self.config = config
-        self.controller = config.controller
-        self.mission_filepath = config.missions.get(self.task_id, None)
+        self.controller = context.controller
+        self.mission_filepath = context.missions.get(self.task_id, None)
         self.compile()
 
     async def execute(self) -> int:

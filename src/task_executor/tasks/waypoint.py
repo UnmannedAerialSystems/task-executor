@@ -1,19 +1,21 @@
-# waypoint.py
-# version: 1.0.0
+# src/task_executor/tasks/waypoint.py
+# version: 1.1.0
 # Author: 
 # Creation Date: 2025-09-25
-# Last Modified: 2025-09-25
+# Last Modified: 2025-09-30
 # Organization: PSU UAS
 
 from task_executor.models.task import Task
 from task_executor.models.request import Request
 
+from task_executor.modules.context import Context
+
 class Waypoint(Task):
 
-    def __init__(self, req: Request, mission_filepath: str):
-        super().__init__(req, mission_filepath)
+    def __init__(self, req: Request, context: Context):
+        super().__init__(req, context)
 
-    def _do_execute(self) -> int:
+    async def _do_execute(self) -> int:
         print("Executing Waypoint Task")
         return 0
     

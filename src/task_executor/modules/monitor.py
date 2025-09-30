@@ -1,9 +1,10 @@
-# config.py
-# version 1.0.0
+# src/task_executor/modules/config.py
+# version 1.0.1
 # Author: Theodore Tasman
 # Creation Date: 2025-09-29
 # Last Modified: 2025-09-29
 
+from task_executor.modules.context import Context
 from task_executor.utils.zmq_subscriber import ZMQSubscriber
 
 import json
@@ -11,8 +12,8 @@ import time
 import asyncio
 
 class Monitor:
-    def __init__(self, host='localhost', port=5555, topic='mavlink'):
-        self.subscriber = ZMQSubscriber(host=host, port=port, topic=topic)
+    def __init__(self, context: Context):
+        self.subscriber = ZMQSubscriber(host=context.zmq_host, port=context.zmq_port, topic=context.zmq_topic)
         self.running = True
 
     async def start(self):

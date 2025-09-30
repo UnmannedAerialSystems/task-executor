@@ -1,5 +1,5 @@
-# catalog.py
-# version: 1.1.0
+# src/task_executor/modules/catalog.py
+# version: 1.1.1
 # Author: Theodore Tasman
 # Creation Date: 2025-09-25
 # Last Modified: 2025-09-29
@@ -7,7 +7,8 @@
 
 from task_executor.models.task import Task
 from task_executor.models.request import Request
-from task_executor.models.config import Config
+
+from task_executor.modules.context import Context
 
 # begin task imports
 from task_executor.tasks.airdrop import Airdrop
@@ -29,8 +30,8 @@ class Catalog:
         "waypoint": Waypoint,
     }
 
-    def __init__(self, config: Config):
-        self.config = config
+    def __init__(self, context: Context):
+        self.context = context
 
     def get_task(self, request: Request) -> Task:
         """
@@ -45,4 +46,4 @@ class Catalog:
         task_class = self.__TASK_CATALOG.get(request.task_id)
         if task_class is None:
             raise ValueError(f"No task found for task ID: {request.task_id}")
-        return task_class(request, self.config)
+        return task_class(request, self.context)

@@ -1,4 +1,4 @@
-# config.py
+# src/task_executor/utils/config.py
 # version 1.0.0
 # Author: Theodore Tasman
 # Creation Date: 2025-09-29
@@ -7,7 +7,7 @@
 import zmq
 
 class ZMQSubscriber:
-    def __init__(self, host, port, topic):
+    def __init__(self, host: str, port: int, topic: str):
         self.ctx = zmq.Context()
         self.sub = self.ctx.socket(zmq.SUB)
         self.sub.connect(f"tcp://{host}:{port}")
