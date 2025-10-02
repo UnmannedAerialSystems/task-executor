@@ -1,84 +1,37 @@
 # src/task_executor/models/request.py
-# version: 1.0.0
+# version: 1.1.0
 # Author: Theodore Tasman
 # Creation Date: 2025-09-25
-# Last Modified: 2025-09-25
+# Last Modified: 2025-10-01
 # Organization: PSU UAS
 
-import json
+from typing import Any, List
+from pydantic import BaseModel, Field
 
-class Request:
+class Request(BaseModel):
+    """
+    A class representing a task request.
+    """
 
-    def __init__(self, request_id: int, task_id: str, priority: int, params: list):
-        self.request_id = request_id
-        self.task_id = task_id
-        self.priority = priority
-        self.params = params
-
-    @classmethod
-    def from_json(cls, json_data: str):
-        """
-        Create a Request instance from JSON data.
-
-        Args:
-            json_data (str): JSON string representing the request.
-
-        Returns:
-            Request: An instance of the Request class.
-        """
-        data = json.loads(json_data)
-        return cls.from_dict(data)
+    request_id: int
+    task_id: str
+    priority: int = Field(default=0)
+    params: List[Any] = Field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, data: dict):
-        """
-        Create a Request instance from a dictionary.
+    def from_json(cls, json_data: str) -> "Request":
+        """Create a Request instance from a JSON string."""
+        return cls.model_validate_json(json_data)
 
-        Args:
-            data (dict): Dictionary representing the request.
+    @classmethod
+    def from_dict(cls, data: dict) -> "Request":
+        """Create a Request instance from a dictionary."""
+        return cls.model_validate(data)
 
-        Returns:
-            Request: An instance of the Request class.
-        """
-        request_id = data.get('request_id')
-        if request_id is None:
-            raise ValueError("request_id is required and cannot be None")
-        task_id = data.get('task_id')
-        if task_id is None:
-            raise ValueError("task_id is required and cannot be None")
-        priority = data.get('priority', 0)
-        params = data.get('params', [])
-        return cls(
-            request_id=request_id,
-            task_id=task_id,
-            priority=priority,
-            params=params
-        )
-    
     def to_dict(self) -> dict:
-        """
-        Convert the Request instance to a dictionary.
-
-        Returns:
-            dict: A dictionary representation of the Request instance.
-        """
-        return {
-            'request_id': self.request_id,
-            'task_id': self.task_id,
-            'priority': self.priority,
-            'params': self.params
-        }
+        """Convert the Request instance to a dictionary."""
+        return self.model_dump()
 
     def to_json(self) -> str:
-        """
-        Convert the Request instance to a JSON string.
-
-        Returns:
-            str: A JSON string representation of the Request instance.
-        """
-        return json.dumps(self.to_dict())
-
-    def __repr__(self):
-        return f"Request(request_id={self.request_id}, task_id='{self.task_id}', priority={self.priority}, params={self.params})"
-    
-    __str__ = __repr__
+        """Convert the Request instance to a JSON string."""
+        return self.model_dump_json()

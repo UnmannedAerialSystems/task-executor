@@ -1,4 +1,6 @@
+from task_executor.models.context_config import ContextConfig
 from task_executor.models.request import Request
+from task_executor.models.task import ROUTINE_PRIORITY
 
 from task_executor.modules.catalog import Catalog
 from task_executor.modules.context import Context
@@ -7,7 +9,6 @@ from task_executor.modules.monitor import Monitor
 import asyncio
 import signal
 import sys
-
 
 WAYPOINT_FILE_PATH = "missions/waypoint.txt"
 TAKEOFF_FILE_PATH = "missions/takeoff.txt"
@@ -30,12 +31,25 @@ async def main():
             "takeoff": TAKEOFF_FILE_PATH,
             "land": LANDING_FILE_PATH
         },
-        "zmq": {
+        "zmq": {   
             "host": "127.0.0.1", 
-            "port": 5555
+            "telemetry": {
+                "port": 5555,
+                "topic": "mavlink",
+            },
+            "tasks": {
+                "port": 5556,
+                "topic": "tasks"
+            }
         }
     }
-    context = Context(config)
+    try:
+        context = Context(ContextConfig.model_validate(config))
+    except Exception as e:
+        print(f"Configuration Error: {e}")
+        return
+    
+    # start flight controller
     await context.controller.start()
 
     # Set up signal handlers for graceful shutdown
@@ -58,7 +72,16 @@ async def main():
         Request(
             request_id=1,
             task_id="takeoff",
-            priority=1,
+            priority=ROUTINE_PRIORITY,
+            params=[]
+        )
+    )
+
+    landing_task = catalog.get_task(
+        Request(
+            request_id=2,
+            task_id="land",
+            priority=ROUTINE_PRIORITY,
             params=[]
         )
     )
@@ -66,6 +89,7 @@ async def main():
     try:
         print("\nExecuting Tasks...")
         await takeoff_task.execute()
+        await context.queue.add(landing_task)
 
         print("Task completed. Monitoring... (Ctrl+C to exit)")
         
@@ -84,6 +108,13 @@ async def main():
         except asyncio.CancelledError:
             pass
         
+        # Cancel running task if any
+        if context.running_task and context.running_task.cancel():
+            try:
+                await context.running_task
+            except asyncio.CancelledError:
+                pass
+
         # Stop controller
         await context.controller.stop()
         
