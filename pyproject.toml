@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name='task-executor'
-version='1.3.0'
+version='1.4.0'
 description='A Python package for executing and managing UAS tasks with prioritization and scheduling capabilities.'
 authors=[
     {name='The Pennsylvania State University Unmanned Aerial Systems Club', email='psuuasofficial@gmail.com'}
