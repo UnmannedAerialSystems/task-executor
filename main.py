@@ -1,6 +1,6 @@
 from task_executor.models.context_config import ContextConfig
 from task_executor.models.request import Request
-from task_executor.models.task import ROUTINE_PRIORITY
+from task_executor.models.task import IMMEDIATE_PRIORITY, ROUTINE_PRIORITY
 
 from task_executor.modules.catalog import Catalog
 from task_executor.modules.context import Context
@@ -10,7 +10,10 @@ import asyncio
 import signal
 import sys
 
+from testing.delayed_trigger import delayed_trigger
+
 WAYPOINT_FILE_PATH = "missions/waypoint.txt"
+DETECT_FILE_PATH = "missions/detect.txt"
 TAKEOFF_FILE_PATH = "missions/takeoff.txt"
 LANDING_FILE_PATH = "missions/landing.txt"
 
@@ -26,11 +29,14 @@ async def main():
 
     # initialize context
     config = {
-        "missions": {
-            "waypoint": WAYPOINT_FILE_PATH,
+        "task_missions": {
             "takeoff": TAKEOFF_FILE_PATH,
-            "land": LANDING_FILE_PATH
+            "land": LANDING_FILE_PATH,
         },
+        "waypoint_missions": [
+            WAYPOINT_FILE_PATH,
+            DETECT_FILE_PATH
+        ],
         "zmq": {   
             "host": "127.0.0.1", 
             "telemetry": {
@@ -41,6 +47,10 @@ async def main():
                 "port": 5556,
                 "topic": "tasks"
             }
+        },
+        "logging": {
+            "level": "INFO",
+            "directory": "flight_logs",
         }
     }
     try:
@@ -49,7 +59,7 @@ async def main():
         print(f"Configuration Error: {e}")
         return
     
-    # start flight controller
+    # start flight controller messaging
     await context.controller.start()
 
     # Set up signal handlers for graceful shutdown
@@ -77,11 +87,38 @@ async def main():
         )
     )
 
-    landing_task = catalog.get_task(
+    detect_task = catalog.get_task(
         Request(
             request_id=2,
+            task_id="waypoint",
+            priority=ROUTINE_PRIORITY,
+            params=[1]
+        )
+    )
+
+    waypoint_task = catalog.get_task(
+        Request(
+            request_id=3,
+            task_id="waypoint",
+            priority=ROUTINE_PRIORITY,
+            params=[0]
+        )
+    )
+
+    landing_task = catalog.get_task(
+        Request(
+            request_id=4,
             task_id="land",
             priority=ROUTINE_PRIORITY,
+            params=[]
+        )
+    )
+
+    immediate_landing_task = catalog.get_task(
+        Request(
+            request_id=5,
+            task_id="land",
+            priority=IMMEDIATE_PRIORITY,
             params=[]
         )
     )
@@ -89,9 +126,14 @@ async def main():
     try:
         print("\nExecuting Tasks...")
         await takeoff_task.execute()
+        await context.queue.add(detect_task)
+        await context.queue.add(waypoint_task)
         await context.queue.add(landing_task)
 
         print("Task completed. Monitoring... (Ctrl+C to exit)")
+
+        await delayed_trigger(30)
+        await context.queue.add(immediate_landing_task)
         
         # Wait for shutdown signal instead of infinite loop
         await shutdown_event.wait()
@@ -109,9 +151,9 @@ async def main():
             pass
         
         # Cancel running task if any
-        if context.running_task and context.running_task.cancel():
+        if context.task_coroutine and context.task_coroutine.cancel():
             try:
-                await context.running_task
+                await context.task_coroutine
             except asyncio.CancelledError:
                 pass
 

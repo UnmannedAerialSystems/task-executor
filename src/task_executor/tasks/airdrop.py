@@ -2,7 +2,7 @@
 # version: 1.1.0
 # Author: 
 # Creation Date: 2025-09-25
-# Last Modified: 2025-09-30
+# Last Modified: 2025-10-02
 # Organization: PSU UAS
 
 from task_executor.models.task import Task
@@ -16,9 +16,9 @@ class Airdrop(Task):
         super().__init__(req, context)
 
     async def _do_execute(self) -> int:
-        print("Executing Airdrop Task")
+        self.context.logger.info("Executing Airdrop Task")
         return 0
     
     def compile(self) -> int:
-        print("Compiling Airdrop Task")
+        self.context.logger.info("Compiling Airdrop Task")
         return 0

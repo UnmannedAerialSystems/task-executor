@@ -1,5 +1,5 @@
 # src/task_executor/modules/catalog.py
-# version: 1.1.1
+# version: 1.1.2
 # Author: Theodore Tasman
 # Creation Date: 2025-09-25
 # Last Modified: 2025-09-29
@@ -45,5 +45,6 @@ class Catalog:
         """
         task_class = self.__TASK_CATALOG.get(request.task_id)
         if task_class is None:
+            self.context.logger.error(f"No task found for task ID: {request.task_id}")
             raise ValueError(f"No task found for task ID: {request.task_id}")
         return task_class(request, self.context)

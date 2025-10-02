@@ -1,5 +1,5 @@
 # zmq_broker.py
-# version: 1.1.0
+# version: 1.1.1
 # Original Author: Theodore Tasman
 # Creation Date: 2025-09-24
 # Last Modified: 2025-09-24
@@ -24,6 +24,7 @@ class ZMQBroker():
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
         self.socket.bind(f"tcp://{self.host}:{self.port}")
+        self.socket.setsockopt(zmq.LINGER, 0)
 
     async def publish(self, topic: str, message: Any) -> None:
         """

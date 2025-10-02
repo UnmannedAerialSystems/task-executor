@@ -1,13 +1,14 @@
 # src/task_executor/modules/queue.py
-# version: 1.0.0
+# version: 1.0.1
 # Author: Theodore Tasman
 # Creation Date: 2025-10-01
 # Last Modified: 2025-10-01
 # Organization: PSU UAS
 
 import asyncio
-from typing import TYPE_CHECKING
+from MAVez.safe_logger import SafeLogger
 
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from task_executor.models.task import Task
 
@@ -16,7 +17,8 @@ class Queue:
     Queue class to manage routine and immediate tasks.
     """
     
-    def __init__(self):
+    def __init__(self, logger: SafeLogger):
+        self.logger = logger
         self.routine = asyncio.Queue()
         self.immediate = asyncio.Queue()
 
@@ -31,10 +33,10 @@ class Queue:
             int: 0 if the task was added successfully.
         """
         if task.is_immediate():
-            print("[Queue] Adding immediate task")
+            self.logger.info("[Queue] Adding immediate task")
             await self.immediate.put(task)
         else:
-            print("[Queue] Adding routine task")
+            self.logger.info(f"[Queue] Adding routine task: {task.task_id}")
             await self.routine.put(task)
         return 0
     
@@ -48,7 +50,7 @@ class Queue:
         if self.routine.empty():
             return -1
         task = await self.routine.get()
-        print(f"[Queue] Executing routine task: {task.task_id}")
+        self.logger.info(f"[Queue] Executing routine task: {task.task_id}")
         return await task.execute()
     
     async def pop_immediate(self) -> int:
@@ -58,8 +60,8 @@ class Queue:
         Returns:
             int: The result of the task execution, or -1 if the queue is empty.
         """
-        if self.routine.empty():
+        if self.immediate.empty():
             return -1
-        task = await self.routine.get()
-        print(f"[Queue] Executing immediate task: {task.task_id}")
+        task = await self.immediate.get()
+        self.logger.info(f"[Queue] Executing immediate task: {task.task_id}")
         return await task.execute()

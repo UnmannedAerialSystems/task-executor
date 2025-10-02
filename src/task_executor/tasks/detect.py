@@ -1,5 +1,5 @@
 # src/task_executor/tasks/detect.py
-# version: 1.1.0
+# version: 1.1.1
 # Author: 
 # Creation Date: 2025-09-25
 # Last Modified: 2025-09-30
@@ -16,9 +16,9 @@ class Detect(Task):
         super().__init__(req, context)
 
     async def _do_execute(self) -> int:
-        print("Executing Detect Task")
+        self.context.logger.info("Executing Detect Task")
         return 0
     
     def compile(self) -> int:
-        print("Compiling Detect Task")
+        self.context.logger.info("Compiling Detect Task")
         return 0

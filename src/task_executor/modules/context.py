@@ -1,17 +1,19 @@
 # src/task_executor/modules/context.py
-# version: 1.0.1
+# version: 1.0.2
 # Author: Theodore Tasman
 # Creation Date: 2025-09-30
 # Last Modified: 2025-10-01
 
 from task_executor.models.context_config import ContextConfig
+from task_executor.models.task import Task
+
 from task_executor.modules.queue import Queue
 
 from task_executor.utils.zmq_broker import ZMQBroker
 
 from MAVez.flight_controller import FlightController
+from MAVez.safe_logger import configure_logging, SafeLogger
 
-from logging import Logger
 import asyncio
 
 class Context:
@@ -19,9 +21,13 @@ class Context:
     Context class to hold configuration and state information.
     """
 
-    def __init__(self, config: ContextConfig, logger: Logger | None = None):
-        self.missions = config.missions
+    def __init__(self, config: ContextConfig):
+        self.task_missions = config.task_missions
+        self.waypoint_missions = config.waypoint_missions
         self.zmq = config.zmq
+
+        logger = configure_logging()
+        self.logger = SafeLogger(logger)
 
         self.controller = FlightController(
             logger=logger,
@@ -30,7 +36,6 @@ class Context:
             zmq_topic=config.zmq.telemetry.topic,
         )
 
-        self.queue = Queue()
         self.zmq_broker = ZMQBroker(
             host=config.zmq.host,
             port=config.zmq.tasks.port
@@ -46,9 +51,10 @@ class Context:
         self.mission_completed: bool = False
 
         # queue
-        self.queue = Queue()    
+        self.queue = Queue(self.logger)    
 
-        self.running_task: asyncio.Task | None = None
+        self.task_coroutine: asyncio.Task | None = None
+        self.current_task: Task | None = None
 
     def reset_mission_progress(self):
         """

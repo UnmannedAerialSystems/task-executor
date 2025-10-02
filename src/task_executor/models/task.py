@@ -1,5 +1,5 @@
 # src/task_executor/models/task.py
-# version: 1.2.1
+# version: 1.3.0
 # Author: Theodore Tasman
 # Creation Date: 2025-09-25
 # Last Modified: 2025-10-02
@@ -28,7 +28,7 @@ class Task(ABC):
         self.params = request.params
         self.compiled = False
         self.controller = context.controller
-        self.mission_filepath = context.missions.get(self.task_id, None)
+        self.mission_filepath = context.task_missions.get(self.task_id, None)
         self.context = context
         self.compile()
 
@@ -41,7 +41,7 @@ class Task(ABC):
         """
         if not self.compiled:
             raise RuntimeError("Task must be compiled before execution.")
-        self.context.running_task = asyncio.create_task(self._do_execute())
+        self.context.task_coroutine = asyncio.create_task(self._do_execute())
         return 0
     
     def is_immediate(self) -> bool:
@@ -72,3 +72,16 @@ class Task(ABC):
             int: The result of the task compilation.
         """
         pass
+
+    def after(self) -> int:
+        """
+        Actions to perform after task execution.
+
+        Returns:
+            int: The result of the after execution actions.
+        """
+        self.context.task_coroutine = None
+        self.context.current_task = None
+        self.context.task_completed_event.clear()
+        self.context.reset_mission_progress()
+        return 0
