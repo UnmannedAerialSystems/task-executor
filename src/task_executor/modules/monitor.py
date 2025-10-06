@@ -1,4 +1,4 @@
-# src/task_executor/modules/config.py
+# src/task_executor/modules/monitor.py
 # version 1.3.0
 # Author: Theodore Tasman
 # Creation Date: 2025-09-29
@@ -16,6 +16,7 @@ class Monitor:
     def __init__(self, context: Context):
         self.running = True
         self.context = context
+        self.waiting_for_task = False
 
     async def start(self):
         """
@@ -25,25 +26,34 @@ class Monitor:
             while self.running:
                 
                 if not self.context.queue.immediate.empty():
-                        self.context.logger.info("[Monitor] Immediate task detected.")
-                        self.context.task_coroutine.cancel() if self.context.task_coroutine else None
-                        self.context.current_task.after() if self.context.current_task else None
-                        res = await self.context.queue.pop_immediate()
-                        if res == -1:
+                    self.context.logger.info("[Monitor] Immediate task detected.")
+                    self.context.task_coroutine.cancel() if self.context.task_coroutine else None
+                    self.context.current_task.after() if self.context.current_task else None
+                    res = await self.context.queue.pop_immediate()
+                    if res == -1:
+                        if not self.waiting_for_task:
                             self.context.logger.warning("[Monitor] No immediate tasks to execute.")
-                        else:
-                            self.context.logger.info(f"[Monitor] Executed immediate task with result: {res}")
+                            self.waiting_for_task = True
+                    else:
+                        self.context.logger.info(f"[Monitor] Executed immediate task with result: {res}")
+                        self.waiting_for_task = False
 
                 if self.context.task_completed_event.is_set():
                     if self.context.current_task:
                         self.context.current_task.after()
-                    self.context.logger.info("[Monitor] Task completed")
+
+                    if not self.waiting_for_task:   
+                        self.context.logger.info("[Monitor] Task completed")
 
                     res = await self.context.queue.pop_routine()
                     if res == -1:
-                        self.context.logger.warning("[Monitor] No routine tasks to execute.")
+                        if not self.waiting_for_task:
+                            self.context.logger.warning("[Monitor] No routine tasks to execute.")
+                            self.waiting_for_task = True
                     else:
                         self.context.logger.info(f"[Monitor] Executed routine task with result: {res}")
+                        self.waiting_for_task = False
+                        self.context.task_completed_event.clear()
 
                 await asyncio.sleep(0.01)
 

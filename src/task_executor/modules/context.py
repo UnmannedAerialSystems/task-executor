@@ -1,5 +1,5 @@
 # src/task_executor/modules/context.py
-# version: 1.0.2
+# version: 1.0.3
 # Author: Theodore Tasman
 # Creation Date: 2025-09-30
 # Last Modified: 2025-10-01
@@ -8,8 +8,6 @@ from task_executor.models.context_config import ContextConfig
 from task_executor.models.task import Task
 
 from task_executor.modules.queue import Queue
-
-from task_executor.utils.zmq_broker import ZMQBroker
 
 from MAVez.flight_controller import FlightController
 from MAVez.safe_logger import configure_logging, SafeLogger
@@ -36,13 +34,9 @@ class Context:
             zmq_topic=config.zmq.telemetry.topic,
         )
 
-        self.zmq_broker = ZMQBroker(
-            host=config.zmq.host,
-            port=config.zmq.tasks.port
-        )
-
         # task state
         self.task_completed_event = asyncio.Event()
+        self.task_completed_event.set()  # Initially set to allow first task to run
 
         # mission state
         self.current_mission_length: int = -1
