@@ -1,25 +1,35 @@
 # src/task_executor/models/task.py
-# version: 1.2.0
+# version: 1.3.0
 # Author: Theodore Tasman
 # Creation Date: 2025-09-25
-# Last Modified: 2025-09-29
+# Last Modified: 2025-10-02
 # Organization: PSU UAS
-
-from task_executor.models.request import Request
-from task_executor.modules.context import Context
 
 from abc import ABC, abstractmethod
 
-class Task(ABC):
+import asyncio
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from task_executor.models.request import Request
+    from task_executor.modules.context import Context
 
-    def __init__(self, request: Request, context: Context):
+IMMEDIATE_PRIORITY = 1
+ROUTINE_PRIORITY = 2
+
+class Task(ABC):
+    """
+    Abstract base class for all tasks.
+    """
+
+    def __init__(self, request: "Request", context: "Context"):
         self.request_id = request.request_id
         self.task_id = request.task_id
         self.priority = request.priority
         self.params = request.params
         self.compiled = False
         self.controller = context.controller
-        self.mission_filepath = context.missions.get(self.task_id, None)
+        self.mission_filepath = context.task_missions.get(self.task_id, None)
+        self.context = context
         self.compile()
 
     async def execute(self) -> int:
@@ -31,7 +41,17 @@ class Task(ABC):
         """
         if not self.compiled:
             raise RuntimeError("Task must be compiled before execution.")
-        return await self._do_execute()
+        self.context.task_coroutine = asyncio.create_task(self._do_execute())
+        return 0
+    
+    def is_immediate(self) -> bool:
+        """
+        Check if the task is of immediate priority.
+
+        Returns:
+            bool: True if the task is immediate, False otherwise.
+        """
+        return self.priority == 1
 
     @abstractmethod
     async def _do_execute(self) -> int:
@@ -52,3 +72,16 @@ class Task(ABC):
             int: The result of the task compilation.
         """
         pass
+
+    def after(self) -> int:
+        """
+        Actions to perform after task execution.
+
+        Returns:
+            int: The result of the after execution actions.
+        """
+        self.context.task_coroutine = None
+        self.context.current_task = None
+        self.context.task_completed_event.clear()
+        self.context.reset_mission_progress()
+        return 0
