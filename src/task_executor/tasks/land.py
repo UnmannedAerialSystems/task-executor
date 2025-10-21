@@ -5,7 +5,8 @@
 # Last Modified: 2025-09-30
 # Organization: PSU UAS
 
-import json
+from uas_messenger.subscriber import Subscriber
+from uas_messenger.message import Message
 
 from task_executor.enums.mavlink import MavLandedState, MavMessageType
 
@@ -15,7 +16,6 @@ from task_executor.models.request import Request
 from task_executor.modules.context import Context
 
 from task_executor.utils.utils import get_mission_length
-from task_executor.utils.zmq_subscriber import ZMQSubscriber
 
 from MAVez.mission import Mission
 
@@ -23,7 +23,7 @@ class Land(Task):
 
     def __init__(self, req: Request, context: Context):
         super().__init__(req, context)
-        self.zmq_sub = None
+        self.sub = None
         self.last_landed_state = MavLandedState.UNDEFINED
 
 
@@ -43,8 +43,11 @@ class Land(Task):
             return res
         await self.mission.send_mission()
         await self.controller.set_mode("AUTO")
-        self.zmq_sub = ZMQSubscriber(self.context.zmq.host, self.context.zmq.telemetry.port, "mavlink_EXTENDED_SYS_STATE", self.context.logger)
-        await self.zmq_sub.start(self.handler)
+        self.sub = Subscriber(host=self.context.messaging.host, 
+                              port=self.context.messaging.telemetry.port, 
+                              topics=["mavlink_EXTENDED_SYS_STATE"], 
+                              callback=self.handler)
+        self.sub.start()
         return 0
     
     def compile(self) -> int:
@@ -60,8 +63,8 @@ class Land(Task):
         self.compiled = True
         return 0
     
-    async def handler(self, msg: str) -> int:
-        data = json.loads(msg)
+    async def handler(self, msg: Message):
+        data = msg.header
         landed_state = MavLandedState(data.get("landed_state", MavLandedState.UNDEFINED))
 
         if landed_state == MavLandedState.UNDEFINED:
@@ -71,20 +74,18 @@ class Land(Task):
             self.context.logger.info("[Handler] Land mission completed")
             await self.finish()
             self.context.task_completed_event.set()
-            return 0
         
         elif landed_state != self.last_landed_state:
             self.context.logger.info(f"[Handler] Landed state: {landed_state.name}")
             self.last_landed_state = landed_state
 
-        return -1
     
     async def finish(self) -> int:
         res = await self.controller.disable_message_interval(MavMessageType.EXTENDED_SYS_STATE.value)
         if res != 0:
             self.context.logger.error("[Land] Failed to disable EXTENDED_SYS_STATE message interval")
 
-        self.zmq_sub.stop() if self.zmq_sub else None
+        await self.sub.close() if self.sub else None
 
         res = await self.controller.disarm()
         if res != 0:

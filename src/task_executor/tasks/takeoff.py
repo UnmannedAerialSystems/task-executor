@@ -5,13 +5,15 @@
 # Last Modified: 2025-10-02
 # Organization: PSU UAS
 
+from uas_messenger.subscriber import Subscriber
+from uas_messenger.message import Message
+
 from task_executor.models.task import Task
 from task_executor.models.request import Request
 
 from task_executor.modules.context import Context
 
 from task_executor.utils.utils import get_mission_length, is_mission_completed
-from task_executor.utils.zmq_subscriber import ZMQSubscriber
 
 class Takeoff(Task):
 
@@ -31,8 +33,11 @@ class Takeoff(Task):
         self.context.current_mission_length = self.length
         await self.controller.arm()
         await self.controller.takeoff(self.mission_filepath)
-        self.zmq_sub = ZMQSubscriber(self.context.zmq.host, self.context.zmq.telemetry.port, "mavlink_MISSION_ITEM_REACHED", self.context.logger)
-        await self.zmq_sub.start(self.handler)
+        self.sub = Subscriber(host=self.context.messaging.host, 
+                              port=self.context.messaging.telemetry.port, 
+                              topics=["mavlink_MISSION_ITEM_REACHED"], 
+                              callback=self.handler)
+        self.sub.start()
         return 0
     
     def compile(self) -> int:
@@ -44,10 +49,9 @@ class Takeoff(Task):
             raise RuntimeError("Takeoff mission file is empty or invalid.")
         return 0
     
-    async def handler(self, msg: str) -> int:
+    async def handler(self, msg: Message) -> None:
         if await is_mission_completed(msg, self.context):
             self.context.logger.info("[Takeoff] Takeoff mission completed.")
-            self.zmq_sub.stop() if self.zmq_sub else None
+            await self.sub.close() if self.sub else None
             self.context.task_completed_event.set()
-            return 0
-        return -1
+
