@@ -45,10 +45,10 @@ class Queue:
         Execute a task from the routine queue if available.
 
         Returns:
-            int: The result of the task execution, or -1 if the queue is empty.
+            int: The result of the task execution, or 1 if the queue is empty.
         """
         if self.routine.empty():
-            return -1
+            return 1
         task = await self.routine.get()
         self.logger.info(f"[Queue] Executing routine task: {task.task_id}")
         return await task.execute()
@@ -58,10 +58,10 @@ class Queue:
         Execute a task from the routine queue if available.
 
         Returns:
-            int: The result of the task execution, or -1 if the queue is empty.
+            int: The result of the task execution, or 1 if the queue is empty.
         """
         if self.immediate.empty():
-            return -1
+            return 1
         task = await self.immediate.get()
         self.logger.info(f"[Queue] Executing immediate task: {task.task_id}")
         return await task.execute()

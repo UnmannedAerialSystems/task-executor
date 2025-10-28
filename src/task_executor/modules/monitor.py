@@ -30,10 +30,12 @@ class Monitor:
                     self.context.task_coroutine.cancel() if self.context.task_coroutine else None
                     self.context.current_task.after() if self.context.current_task else None
                     res = await self.context.queue.pop_immediate()
-                    if res == -1:
+                    if res == 1:
                         if not self.waiting_for_task:
                             self.context.logger.warning("[Monitor] No immediate tasks to execute.")
                             self.waiting_for_task = True
+                    elif res == -1:
+                        self.context.logger.warning("[Monitor] Failed to execute immediate task.")
                     else:
                         self.context.logger.info(f"[Monitor] Executed immediate task with result: {res}")
                         self.waiting_for_task = False
@@ -46,10 +48,12 @@ class Monitor:
                         self.context.logger.info("[Monitor] Task completed")
 
                     res = await self.context.queue.pop_routine()
-                    if res == -1:
+                    if res == 1:
                         if not self.waiting_for_task:
                             self.context.logger.warning("[Monitor] No routine tasks to execute.")
                             self.waiting_for_task = True
+                    elif res == -1:
+                        self.context.logger.warning("[Monitor] Failed to execute routine task.")
                     else:
                         self.context.logger.info(f"[Monitor] Executed routine task with result: {res}")
                         self.waiting_for_task = False
@@ -59,7 +63,6 @@ class Monitor:
 
         except asyncio.CancelledError:
             self.context.logger.info("[Monitor] Monitor stopped")
-            raise
 
         except Exception as e:
             self.context.logger.error(f"[Monitor] Error: {e}")

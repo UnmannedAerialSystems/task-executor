@@ -29,10 +29,12 @@ class Land(Task):
 
     async def _do_execute(self) -> int:
         if not self.compiled:
-            raise RuntimeError("Task must be compiled before execution.")
+            self.context.logger.critical("[Land] Task must be compiled before execution.")
+            raise RuntimeError("Task must be compiled before execution.") # throw to crash coroutine
         
         if self.mission_filepath is None:
-            raise ValueError("Takeoff mission filepath is not available.")
+            self.context.logger.critical("[Land] Takeoff mission filepath is not available.")
+            raise ValueError("Takeoff mission filepath is not available.") # throw to crash coroutine
         
         self.context.mission_in_progress = True
         self.context.current_mission_length = self.length
@@ -52,14 +54,17 @@ class Land(Task):
     
     def compile(self) -> int:
         if self.mission_filepath is None:
-            raise ValueError("Land mission filepath is not available.")
+            self.context.logger.error("[Land] Mission filepath is not available.")
+            return -1
         self.length = get_mission_length(self.mission_filepath)
         if self.length == 0:
-            raise RuntimeError("Land mission file is empty or invalid.")
+            self.context.logger.error("[Land] Land mission file is empty or invalid.")
+            return -1
         self.mission = Mission(self.context.controller)
         loaded = self.mission.load_mission_from_file(self.mission_filepath)
         if loaded != 0:
-            raise RuntimeError("Failed to load land mission from file.")
+            self.context.logger.error("[Land] Failed to load land mission from file.")
+            return -1
         self.compiled = True
         return 0
     
@@ -75,7 +80,8 @@ class Land(Task):
             await self.finish()
             self.context.task_completed_event.set()
         
-        elif landed_state != self.last_landed_state:
+        # elif landed_state != self.last_landed_state:
+        else:
             self.context.logger.info(f"[Handler] Landed state: {landed_state.name}")
             self.last_landed_state = landed_state
 

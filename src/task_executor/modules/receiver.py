@@ -4,8 +4,6 @@
 # Creation Date: 2025-10-06
 # Last Modified: 2025-10-06
 
-import json
-
 from uas_messenger.subscriber import Subscriber
 from uas_messenger.message import Message
 
@@ -43,12 +41,11 @@ class Receiver:
                 await asyncio.sleep(0.1)
 
         except asyncio.CancelledError:
-            self.context.logger.info("[Monitor] Monitor stopped")
-            raise
+            self.context.logger.info("[Receiver] Receiver stopped")
 
         except Exception as e:
-            self.context.logger.error(f"[Monitor] Error: {e}")
-            
+            self.context.logger.error(f"[Receiver] Error: {e}")
+
         finally:
             await self.sub.close()
             self.stop()
@@ -66,7 +63,7 @@ class Receiver:
             if task:
                 await self.context.queue.add(task)
             else:
-                self.context.logger.error(f"[Receiver] Unknown task ID: {request.task_id}")
+                self.context.logger.error(f"[Receiver] Failed to retrieve task: {request.task_id}")
 
     def stop(self):
         """

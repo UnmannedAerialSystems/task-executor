@@ -1,11 +1,12 @@
 import asyncio
-from task_executor.modules.catalog import Catalog
 from task_executor.models.request import Request
 from task_executor.models.task import IMMEDIATE_PRIORITY, ROUTINE_PRIORITY
-from task_executor.utils.zmq_broker import ZMQBroker
+
+from uas_messenger.publisher import Publisher
+from uas_messenger.message import Message
 
 async def main():
-    broker = ZMQBroker(host="127.0.0.1", port=5556)
+    pub = Publisher(host="127.0.0.1", port=5556)
     seq = 0
     print("Enter a task (or 'exit' to quit) ('!' for immediate execution): ")
     while True:
@@ -39,8 +40,9 @@ async def main():
             params=params,
             priority=IMMEDIATE_PRIORITY if immediate else ROUTINE_PRIORITY
         )
+        msg = Message(topic="task_request", header=req.model_dump())
         print(f"Sending request: {req}")
-        await broker.publish("task_request", req.model_dump_json())
+        pub.send(msg)
         seq += 1
 
 if __name__ == "__main__":

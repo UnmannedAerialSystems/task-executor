@@ -19,14 +19,16 @@ class Takeoff(Task):
 
     def __init__(self, req: Request, context: Context):
         super().__init__(req, context)
-        self.zmq_sub = None
+        self.sub = None
 
     async def _do_execute(self) -> int:
         if not self.compiled:
-            raise RuntimeError("Task must be compiled before execution.")
+            self.context.logger.critical("[Takeoff] Task must be compiled before execution.")
+            raise RuntimeError("Task must be compiled before execution.") # throw to crash coroutine
         
         if self.mission_filepath is None:
-            raise ValueError("Takeoff mission filepath is not available.")
+            self.context.logger.critical("[Takeoff] Takeoff mission filepath is not available.")
+            raise ValueError("Takeoff mission filepath is not available.") # throw to crash coroutine
         
         self.context.current_task = self
         self.context.mission_in_progress = True
@@ -43,10 +45,12 @@ class Takeoff(Task):
     def compile(self) -> int:
         self.compiled = True
         if self.mission_filepath is None:
-            raise ValueError("Takeoff mission filepath is not available.")
+            self.context.logger.error("[Takeoff] Takeoff mission filepath is not available.")
+            return -1
         self.length = get_mission_length(self.mission_filepath)
         if self.length == 0:
-            raise RuntimeError("Takeoff mission file is empty or invalid.")
+            self.context.logger.error("[Takeoff] Takeoff mission file is empty or invalid.")
+            return -1
         return 0
     
     async def handler(self, msg: Message) -> None:
@@ -54,4 +58,5 @@ class Takeoff(Task):
             self.context.logger.info("[Takeoff] Takeoff mission completed.")
             await self.sub.close() if self.sub else None
             self.context.task_completed_event.set()
+    
 
