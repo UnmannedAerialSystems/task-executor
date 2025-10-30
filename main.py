@@ -38,7 +38,7 @@ async def main():
             WAYPOINT_FILE_PATH,
             DETECT_FILE_PATH
         ],
-        "zmq": {   
+        "messaging": {   
             "host": "127.0.0.1", 
             "telemetry": {
                 "port": 5555,

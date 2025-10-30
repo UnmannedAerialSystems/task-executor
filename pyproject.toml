@@ -14,4 +14,5 @@ readme='README.md'
 dependencies=[
     'MAVez>=3.2.0',
     'pydantic>=2.11.9',
+    'uas-messenger>=1.1.0'
 ]

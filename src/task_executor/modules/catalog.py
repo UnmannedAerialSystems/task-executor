@@ -33,7 +33,7 @@ class Catalog:
     def __init__(self, context: Context):
         self.context = context
 
-    def get_task(self, request: Request) -> Task:
+    def get_task(self, request: Request) -> Task | None:
         """
         Retrieve a Task instance based on the given task ID.
 
@@ -41,10 +41,10 @@ class Catalog:
             task_id (str): The ID of the task.
 
         Returns:
-            Task: An instance of a class that implements the Task interface.
+            Task | None: An instance of a class that implements the Task interface, or None if not found.
         """
         task_class = self.__TASK_CATALOG.get(request.task_id)
         if task_class is None:
             self.context.logger.error(f"No task found for task ID: {request.task_id}")
-            raise ValueError(f"No task found for task ID: {request.task_id}")
+            return None
         return task_class(request, self.context)

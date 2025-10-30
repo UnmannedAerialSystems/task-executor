@@ -40,7 +40,11 @@ class Task(ABC):
             int: The result of the task execution.
         """
         if not self.compiled:
-            raise RuntimeError("Task must be compiled before execution.")
+            self.context.logger.error(f"Task {self.task_id} not compiled.")
+            return -1
+        
+        self.context.task_coroutine.cancel() if self.context.task_coroutine else None
+        self.context.current_task.after() if self.context.current_task else None
         self.context.task_coroutine = asyncio.create_task(self._do_execute())
         return 0
     
@@ -80,6 +84,10 @@ class Task(ABC):
         Returns:
             int: The result of the after execution actions.
         """
+        # TODO: Adde shutdown abstract method to Task class, implement closing of subscribers in tasks
+        if self.sub: 
+            self.sub.close()
+            self.sub = None
         self.context.task_coroutine = None
         self.context.current_task = None
         self.context.task_completed_event.clear()

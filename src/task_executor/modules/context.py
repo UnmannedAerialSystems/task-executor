@@ -22,16 +22,16 @@ class Context:
     def __init__(self, config: ContextConfig):
         self.task_missions = config.task_missions
         self.waypoint_missions = config.waypoint_missions
-        self.zmq = config.zmq
+        self.messaging = config.messaging
 
         logger = configure_logging()
         self.logger = SafeLogger(logger)
 
         self.controller = FlightController(
             logger=logger,
-            zmq_host=config.zmq.host,
-            zmq_port=config.zmq.telemetry.port,
-            zmq_topic=config.zmq.telemetry.topic,
+            message_host=config.messaging.host,
+            message_port=config.messaging.telemetry.port,
+            message_topic=config.messaging.telemetry.topic,
         )
 
         # task state
