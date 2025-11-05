@@ -33,7 +33,7 @@ async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("direction", type=str, help="Takeoff/landing direction (ne, nw, se, sw)")
     args = parser.parse_args()
-    dir = args.direction
+    dir = args.direction.lower()
 
     if dir not in ["ne", "nw", "se", "sw"]:
         print("[error] Direction argument must be ne, nw, se, or sw")
