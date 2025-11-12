@@ -14,11 +14,11 @@ import argparse
 from task_executor.modules.receiver import Receiver
 from testing.delayed_trigger import delayed_trigger
 
-WAYPOINT_PATH_0 = "missions/wp_0.txt"
-WAYPOINT_PATH_1 = "missions/wp_1.txt"
-AIRDROP_PATH = "missions/airdrop.txt"
-TAKEOFF_DIRECTORY = "missions/takeoff"
-LAND_DIRECTORY = "missions/land"
+WAYPOINT_PATH_0 = "missions/test-flight/wp_0.txt"
+WAYPOINT_PATH_1 = "missions/test-flight/wp_1.txt"
+AIRDROP_PATH = "missions/test-flight/airdrop.txt"
+TAKEOFF_DIRECTORY = "missions/test-flight/takeoff"
+LAND_DIRECTORY = "missions/test-flight/land"
 
 # Global flag for shutdown
 shutdown_event = asyncio.Event()
@@ -104,6 +104,9 @@ async def main():
             params=[]
         )
     )
+    if not takeoff_task:
+        print("[error] Takeoff task could not be created.")
+        return
 
     waypoint_0_task = catalog.get_task(
         Request(
@@ -113,6 +116,9 @@ async def main():
             params=[0]
         )
     )
+    if not waypoint_0_task:
+        print("[error] Waypoint 0 task could not be created.")
+        return
 
     waypoint_1_task = catalog.get_task(
         Request(
@@ -122,6 +128,9 @@ async def main():
             params=[1]
         )
     )
+    if not waypoint_1_task:
+        print("[error] Waypoint 1 task could not be created.")
+        return
 
     landing_task = catalog.get_task(
         Request(
@@ -131,6 +140,9 @@ async def main():
             params=[]
         )
     )
+    if not landing_task:
+        print("[error] Landing task could not be created.")
+        return
 
     immediate_landing_task = catalog.get_task(
         Request(
@@ -140,6 +152,9 @@ async def main():
             params=[]
         )
     )
+    if not immediate_landing_task:
+        print("[error] Immediate landing task could not be created.")
+        return
 
     try:
         print("\nExecuting Tasks...")
