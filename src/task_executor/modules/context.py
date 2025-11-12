@@ -29,9 +29,9 @@ class Context:
 
         self.controller = FlightController(
             logger=logger,
-            zmq_host=config.messaging.host,
-            zmq_port=config.messaging.telemetry.port,
-            zmq_topic=config.messaging.telemetry.topic,
+            message_host=config.messaging.host,
+            message_port=config.messaging.telemetry.port,
+            message_topic=config.messaging.telemetry.topic,
         )
 
         # task state
