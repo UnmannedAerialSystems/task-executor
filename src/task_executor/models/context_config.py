@@ -15,3 +15,4 @@ class ContextConfig(BaseModel):
     waypoint_missions: list[str]
     messaging: MessengerConfig
     logging: LoggingConfig
+    connection_string: str

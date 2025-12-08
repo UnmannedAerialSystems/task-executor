@@ -28,6 +28,7 @@ class Context:
         self.logger = SafeLogger(logger)
 
         self.controller = FlightController(
+            connection_string=config.connection_string,
             logger=logger,
             message_host=config.messaging.host,
             message_port=config.messaging.telemetry.port,
