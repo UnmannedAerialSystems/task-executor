@@ -6,11 +6,11 @@
 
 from task_executor.models.context_config import ContextConfig
 from task_executor.models.task import Task
+from task_executor.utils.safe_logger import configure_logging, SafeLogger
 
 from task_executor.modules.queue import Queue
 
 from MAVez.flight_controller import FlightController
-from MAVez.safe_logger import configure_logging, SafeLogger
 
 import asyncio
 from logging import Logger

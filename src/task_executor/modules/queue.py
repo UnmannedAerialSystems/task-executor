@@ -6,7 +6,7 @@
 # Organization: PSU UAS
 
 import asyncio
-from MAVez.safe_logger import SafeLogger
+from task_executor.utils.safe_logger import SafeLogger
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
