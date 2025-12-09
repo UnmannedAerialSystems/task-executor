@@ -10,6 +10,5 @@ from task_executor.models.message_endpoint import MessageEndpoint
 from pydantic import BaseModel
 
 class MessengerConfig(BaseModel):
-    host: str
     telemetry: MessageEndpoint
     tasks: MessageEndpoint

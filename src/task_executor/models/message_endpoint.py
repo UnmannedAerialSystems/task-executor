@@ -8,5 +8,6 @@
 from pydantic import BaseModel
 
 class MessageEndpoint(BaseModel):
+    host: str
     port: int
     topic: str
