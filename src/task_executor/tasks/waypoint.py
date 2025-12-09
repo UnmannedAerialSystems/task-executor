@@ -37,7 +37,7 @@ class Waypoint(Task):
 
         await self.mission.send_mission()
         await self.controller.set_mode("AUTO")
-        self.sub = Subscriber(host=self.context.messaging.host, 
+        self.sub = Subscriber(host=self.context.messaging.telemetry.host, 
                               port=self.context.messaging.telemetry.port, 
                               topics=["mavlink_MISSION_ITEM_REACHED"], 
                               callback=self.handler)

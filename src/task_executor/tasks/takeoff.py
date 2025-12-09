@@ -35,7 +35,7 @@ class Takeoff(Task):
         self.context.current_mission_length = self.length
         await self.controller.arm()
         await self.controller.takeoff(self.mission_filepath)
-        self.sub = Subscriber(host=self.context.messaging.host, 
+        self.sub = Subscriber(host=self.context.messaging.telemetry.host, 
                               port=self.context.messaging.telemetry.port, 
                               topics=["mavlink_MISSION_ITEM_REACHED"], 
                               callback=self.handler)
