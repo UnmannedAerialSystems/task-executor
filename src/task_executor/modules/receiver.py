@@ -24,7 +24,7 @@ class Receiver:
         self.running = True
         self.context = context
         self.sub = Subscriber(
-            host=context.messaging.host,
+            host=context.messaging.tasks.host,
             port=context.messaging.tasks.port,
             topics=[context.messaging.tasks.topic],
             callback=self.handle_request
