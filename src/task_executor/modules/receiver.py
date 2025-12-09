@@ -1,8 +1,8 @@
 # src/task_executor/modules/receiver.py
-# version 1.0.0
+# version 1.0.1
 # Author: Theodore Tasman
 # Creation Date: 2025-10-06
-# Last Modified: 2025-10-06
+# Last Modified: 2025-12-09
 
 from uas_messenger.subscriber import Subscriber
 from uas_messenger.message import Message

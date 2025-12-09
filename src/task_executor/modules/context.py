@@ -1,8 +1,8 @@
 # src/task_executor/modules/context.py
-# version: 1.0.3
+# version: 1.0.4
 # Author: Theodore Tasman
 # Creation Date: 2025-09-30
-# Last Modified: 2025-10-01
+# Last Modified: 2025-12-09
 
 from task_executor.models.context_config import ContextConfig
 from task_executor.models.task import Task
@@ -13,18 +13,20 @@ from MAVez.flight_controller import FlightController
 from MAVez.safe_logger import configure_logging, SafeLogger
 
 import asyncio
+from logging import Logger
 
 class Context:
     """
     Context class to hold configuration and state information.
     """
 
-    def __init__(self, config: ContextConfig):
+    def __init__(self, config: ContextConfig, logger: Logger | None = None):
         self.task_missions = config.task_missions
         self.waypoint_missions = config.waypoint_missions
         self.messaging = config.messaging
 
-        logger = configure_logging()
+        if logger is None:
+            logger = configure_logging()
         self.logger = SafeLogger(logger)
 
         self.controller = FlightController(

@@ -1,8 +1,8 @@
 # src/task_executor/models/messenger_config.py
-# version: 1.0.0
+# version: 1.1.0
 # Author: Theodore Tasman
 # Creation Date: 2025-10-21
-# Last Modified: 2025-10-21
+# Last Modified: 2025-12-09
 # Organization: PSU UAS
 
 from task_executor.models.message_endpoint import MessageEndpoint
