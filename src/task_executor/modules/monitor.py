@@ -28,7 +28,7 @@ class Monitor:
                 if not self.context.queue.immediate.empty():
                     self.context.logger.info("[Monitor] Immediate task detected.")
                     self.context.task_coroutine.cancel() if self.context.task_coroutine else None
-                    self.context.current_task.after() if self.context.current_task else None
+                    await self.context.current_task.after() if self.context.current_task else None
                     res = await self.context.queue.pop_immediate()
                     if res == 1:
                         if not self.waiting_for_task:

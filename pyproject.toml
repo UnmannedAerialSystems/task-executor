@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name='task-executor'
-version='1.5.1'
+version='1.5.2'
 description='A Python package for executing and managing UAS tasks with prioritization and scheduling capabilities.'
 authors=[
     {name='The Pennsylvania State University Unmanned Aerial Systems Club', email='psuuasofficial@gmail.com'}
@@ -14,5 +14,5 @@ readme='README.md'
 dependencies=[
     'MAVez>=3.5.1',
     'pydantic>=2.11.9',
-    'uas-messenger>=1.1.0'
+    'uas-messenger>=1.1.1'
 ]
