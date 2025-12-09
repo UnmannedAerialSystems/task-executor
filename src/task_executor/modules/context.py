@@ -30,7 +30,7 @@ class Context:
         self.controller = FlightController(
             connection_string=config.connection_string,
             logger=logger,
-            message_host=config.messaging.host,
+            message_host=config.messaging.telemetry.host,
             message_port=config.messaging.telemetry.port,
             message_topic=config.messaging.telemetry.topic,
         )
