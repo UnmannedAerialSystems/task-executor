@@ -76,20 +76,13 @@ class Task(ABC):
             int: The result of the task compilation.
         """
         pass
-
-    def after(self) -> int:
+    
+    @abstractmethod
+    async def after(self) -> int:
         """
         Actions to perform after task execution.
 
         Returns:
             int: The result of the after execution actions.
-        """
-        # TODO: Adde shutdown abstract method to Task class, implement closing of subscribers in tasks
-        if self.sub: 
-            self.sub.close()
-            self.sub = None
-        self.context.task_coroutine = None
-        self.context.current_task = None
-        self.context.task_completed_event.clear()
-        self.context.reset_mission_progress()
-        return 0
+        """         
+        pass

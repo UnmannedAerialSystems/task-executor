@@ -42,7 +42,7 @@ class Monitor:
 
                 if self.context.task_completed_event.is_set():
                     if self.context.current_task:
-                        self.context.current_task.after()
+                        await self.context.current_task.after()
 
                     if not self.waiting_for_task:   
                         self.context.logger.info("[Monitor] Task completed")

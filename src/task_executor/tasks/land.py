@@ -101,3 +101,13 @@ class Land(Task):
         if res != 0:
             self.context.logger.error("[Land] Failed to reset mission index")
         return res
+
+    async def after(self) -> int:
+        if self.sub: 
+            await self.sub.close()
+            self.sub = None
+        self.context.task_coroutine = None
+        self.context.current_task = None
+        self.context.task_completed_event.clear()
+        self.context.reset_mission_progress()
+        return 0
